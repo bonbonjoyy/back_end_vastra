@@ -74,10 +74,9 @@ router.get("/profile", authMiddleware, async(req, res) => {
 router.patch(
     "/profile/update",
     authMiddleware,
-    upload.single("profile_image"),
     async(req, res) => {
         try {
-            const { nama_lengkap, email, username, sandi_saat_ini, kata_sandi } =
+            const { nama_lengkap, email, username, profile_image, sandi_saat_ini, kata_sandi } =
             req.body;
             const updates = {};
             const user = await User.findByPk(req.user.id);
@@ -99,11 +98,12 @@ router.patch(
             }
             if (email) updates.email = email;
             if (username) updates.username = username;
+            if (profile_image) updates.profile_image = profile_image;
 
-            // Update photo jika ada
-            if (req.file) {
-                updates.profile_image = `/uploads/${req.file.filename}`;
-            }
+            // // Update photo jika ada
+            // if (req.file) {
+            //     updates.profile_image = `/uploads/${req.file.filename}`;
+            // }
 
             await User.update(updates, {
                 where: { id: req.user.id },
