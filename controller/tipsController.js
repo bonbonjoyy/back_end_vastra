@@ -16,11 +16,7 @@ const createTips = async (req, res) => {
   try {
     const { judul, kategori, deskripsi, urutan, image } = req.body;
 
-    // Periksa apakah file dikirim
-    const imagePath = req.file && req.file.filename ? `/uploads/${req.file.filename}` : image || null;
-
-    // Buat data baru di database
-    const tips = await Tips.create({ judul, kategori, deskripsi, urutan, image: imagePath });
+    const tips = await Tips.create({ judul, kategori, deskripsi, urutan, image });
 
     res.status(201).json(tips);
   } catch (error) {
