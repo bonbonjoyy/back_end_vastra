@@ -23,40 +23,59 @@ const createTips = async (req, res) => {
   }
 };
 
+// const updateTips = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const { judul, kategori,deskripsi,urutan,image } = req.body;
+//     const existingTips = await Tips.findByPk(id);
+
+//     if (!existingTips) {
+//       return res.status(404).json({ message: "Tips tidak ditemukan." });
+//     }
+
+//     if (!judul || !kategori || !deskripsi ||!urutan || !image) {
+//       return res.status(400).json({ message: "Semua data harus diisi." });
+//     }
+
+//     const updatedTips = await Tips.update(
+//       { judul, kategori, deskripsi, urutan, image: imagePath },
+//       { where: { id } }
+//     );
+
+//     if (!updatedTips) {
+//       return res.status(404).json({ message: "Tips tidak ditemukan." });
+//     }
+
+//     res.status(200).json({ message: "Tips berhasil diperbarui." });
+//   } catch (err) {
+//     console.error("Error saat mengupdate Tips:", err);
+//     res.status(500).json({ message: "Terjadi kesalahan server." });
+//   }
+// };
+
 const updateTips = async (req, res) => {
   try {
     const { id } = req.params;
-    const { judul, kategori,deskripsi,urutan } = req.body;
+    const { judul, kategori, deskripsi, urutan, image } = req.body;
     const existingTips = await Tips.findByPk(id);
 
     if (!existingTips) {
       return res.status(404).json({ message: "Tips tidak ditemukan." });
     }
 
-    if (!judul || !kategori || !deskripsi ||!urutan) {
+    // Validasi input
+    if (!judul || !kategori || !deskripsi || !urutan || !image) {
       return res.status(400).json({ message: "Semua data harus diisi." });
     }
 
-    // Handle image update
-    let imagePath = existingTips.image; // Default to the old image path
-    if (req.file) {
-      // Delete the old image if there's a new one
-      if (existingTips.image) {
-        const oldImagePath = path.join(__dirname, "../public", existingTips.image);
-        if (fs.existsSync(oldImagePath)) {
-          fs.unlinkSync(oldImagePath); // Delete old image from disk
-        }
-      }
-      imagePath = `/uploads/${req.file.filename}`; // Set new image path
-    }
-
-    const updatedTips = await Tips.update(
-      { judul, kategori,deskripsi,urutan, image: imagePath },
+    // Update Tips
+    const [updatedRows] = await Tips.update(
+      { judul, kategori, deskripsi, urutan, image },
       { where: { id } }
     );
 
-    if (!updatedTips) {
-      return res.status(404).json({ message: "Tips tidak ditemukan." });
+    if (updatedRows === 0) {
+      return res.status(404).json({ message: "Tips tidak ditemukan atau tidak ada perubahan." });
     }
 
     res.status(200).json({ message: "Tips berhasil diperbarui." });
