@@ -14,17 +14,13 @@ const getTips = async (req, res) => {
 
 const createTips = async (req, res) => {
   try {
-    const { judul, kategori, deskripsi, urutan, image } = req.body;
-
-    const tips = await Tips.create({ judul, kategori, deskripsi, urutan, image });
-
+    const { judul, kategori,deskripsi,urutan,image } = req.body;
+    const tips = await Tips.create({ judul, kategori,deskripsi,urutan, image });
     res.status(201).json(tips);
   } catch (error) {
-    console.error("Error saat membuat tips:", error); // Tambahkan log untuk debugging
-    res.status(500).json({ message: "Gagal menambah tips", error: error.message });
+    res.status(500).json({ message: "Gagal menambah tips" });
   }
 };
-
 
 // const updateTips = async (req, res) => {
 //   try {
