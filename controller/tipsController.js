@@ -14,14 +14,21 @@ const getTips = async (req, res) => {
 
 const createTips = async (req, res) => {
   try {
-    const { judul, kategori,deskripsi,urutan,image } = req.body;
+    const { judul, kategori, deskripsi, urutan, image } = req.body;
+
+    // Periksa apakah file dikirim
     const imagePath = req.file && req.file.filename ? `/uploads/${req.file.filename}` : image || null;
-    const tips = await Tips.create({ judul, kategori,deskripsi,urutan, image: imagePath });
+
+    // Buat data baru di database
+    const tips = await Tips.create({ judul, kategori, deskripsi, urutan, image: imagePath });
+
     res.status(201).json(tips);
   } catch (error) {
-    res.status(500).json({ message: "Gagal menambah tips" });
+    console.error("Error saat membuat tips:", error); // Tambahkan log untuk debugging
+    res.status(500).json({ message: "Gagal menambah tips", error: error.message });
   }
 };
+
 
 // const updateTips = async (req, res) => {
 //   try {
