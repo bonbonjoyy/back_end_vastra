@@ -56,27 +56,20 @@ const createTips = async (req, res) => {
 const updateTips = async (req, res) => {
   try {
     const { id } = req.params;
-    const { judul, kategori, deskripsi, urutan, image } = req.body;
+    const updateData = req.body; // Data yang akan diperbarui
     const existingTips = await Tips.findByPk(id);
 
     if (!existingTips) {
       return res.status(404).json({ message: "Tips tidak ditemukan." });
     }
 
-    // Validasi input
-    if (!judul || !kategori || !deskripsi || !urutan || !image) {
-      return res.status(400).json({ message: "Semua data harus diisi." });
+    // Cek apakah ada data yang dikirim untuk diupdate
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ message: "Tidak ada data yang dikirim untuk diperbarui." });
     }
 
-    // Update Tips
-    const [updatedRows] = await Tips.update(
-      { judul, kategori, deskripsi, urutan, image },
-      { where: { id } }
-    );
-
-    if (updatedRows === 0) {
-      return res.status(404).json({ message: "Tips tidak ditemukan atau tidak ada perubahan." });
-    }
+    // Update hanya field yang dikirim dalam request
+    await Tips.update(updateData, { where: { id } });
 
     res.status(200).json({ message: "Tips berhasil diperbarui." });
   } catch (err) {
@@ -84,7 +77,6 @@ const updateTips = async (req, res) => {
     res.status(500).json({ message: "Terjadi kesalahan server." });
   }
 };
-
 
 const deleteTips = async (req, res) => {
   try {
