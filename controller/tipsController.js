@@ -14,8 +14,8 @@ const getTips = async (req, res) => {
 
 const createTips = async (req, res) => {
   try {
-    const { judul, kategori,deskripsi,urutan } = req.body;
-    const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+    const { judul, kategori,deskripsi,urutan,image } = req.body;
+    const imagePath = req.file && req.file.filename ? `/uploads/${req.file.filename}` : image || null;
     const tips = await Tips.create({ judul, kategori,deskripsi,urutan, image: imagePath });
     res.status(201).json(tips);
   } catch (error) {
