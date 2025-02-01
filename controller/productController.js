@@ -14,9 +14,8 @@ const getProducts = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
-    const { nama_product, harga, stok, deskripsi,kategori } = req.body;
-    const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
-    const product = await Product.create({ nama_product, harga, stok, deskripsi,kategori, image: imagePath });
+    const { nama_product, harga, stok, deskripsi, kategori, image } = req.body;
+    const product = await Product.create({ nama_product, harga, stok, deskripsi,kategori, image });
     res.status(201).json(product);
   } catch (error) {
     res.status(500).json({ message: "Gagal menambah produk" });
@@ -24,43 +23,35 @@ const createProduct = async (req, res) => {
 };
 
 const updateProduct = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { nama_product, deskripsi, harga, stok, kategori } = req.body;
-
-    const product = await Product.findByPk(id);
-
-    if (!product) {
-      return res.status(404).json({ message: "Produk tidak ditemukan." });
-    }
-
-    // Jika ada gambar baru, hapus gambar lama
-    if (req.file) {
-      if (product.image) {
-        const oldImagePath = path.join(__dirname, "../public", product.image);
-        if (fs.existsSync(oldImagePath)) {
-          fs.unlinkSync(oldImagePath);
-        }
+    try {
+      const { id } = req.params;
+      const updateData = req.body; // Data yang akan diperbarui
+      const existingProduct = await Product.findByPk(id);
+  
+      if (!existingProduct) {
+        return res.status(404).json({ message: "Tips tidak ditemukan." });
       }
-      product.image = `/uploads/${req.file.filename}`;
+  
+      // Cek apakah ada data yang dikirim untuk diupdate
+      if (Object.keys(updateData).length === 0) {
+        return res.status(400).json({ message: "Tidak ada data yang dikirim untuk diperbarui." });
+      }
+  
+      // Cek apakah semua field yang diperlukan ada
+      const { nama_product, deskripsi, harga, stok, kategori, image } = updateData;
+      if (!nama_product || !deskripsi || !harga || !stok || !kategori || !image) {
+        return res.status(400).json({ message: "Semua data harus diisi." });
+      }
+  
+      // Update hanya field yang dikirim dalam request
+      await Product.update(updateData, { where: { id } });
+  
+      res.status(200).json({ message: "Product berhasil diperbarui." });
+    } catch (err) {
+      console.error("Error saat mengupdate Product:", err);
+      res.status(500).json({ message: "Terjadi kesalahan server." });
     }
-
-    // Perbarui data produk
-    product.nama_product = nama_product;
-    product.deskripsi = deskripsi;
-    product.harga = harga;
-    product.stok = stok;
-    product.kategori = kategori;
-
-    await product.save();
-
-    res.status(200).json({ message: "Produk berhasil diperbarui.", product });
-  } catch (err) {
-    console.error("Error saat mengupdate produk:", err);
-    res.status(500).json({ message: "Terjadi kesalahan server." });
-  }
-};
-
+  };
 
 const deleteProduct = async (req, res) => {
   try {
@@ -80,6 +71,7 @@ const deleteProduct = async (req, res) => {
     res.status(500).json({ message: "Gagal menghapus produk" });
   }
 };
+
 const getProductsByCategory = async (req, res) => {
   const { category } = req.params;
 
@@ -99,6 +91,7 @@ const getProductsByCategory = async (req, res) => {
     res.status(500).json({ message: "Error fetching products by category", error: error.message });
   }
 };
+
 const getProductById = async (req, res) => {
   const { id } = req.params;
 

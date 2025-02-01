@@ -53,8 +53,6 @@ const createGaleri = async (req, res) => {
       res.status(500).json({ message: "Terjadi kesalahan server." });
     }
   };
-  
-
 
 const deleteGaleri = async (req, res) => {
   try {
