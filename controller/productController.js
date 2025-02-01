@@ -14,6 +14,7 @@ const getProducts = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
+    console.log("Data yang diterima dari frontend:", req.body);
     const { nama_product, harga, stok, deskripsi, image, kategori } = req.body;
     const product = await Product.create({ nama_product, harga, stok, deskripsi, image, kategori });
     res.status(201).json(product);
