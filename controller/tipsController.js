@@ -67,6 +67,12 @@ const updateTips = async (req, res) => {
       return res.status(400).json({ message: "Tidak ada data yang dikirim untuk diperbarui." });
     }
 
+    // Cek apakah semua field yang diperlukan ada
+    const { judul, kategori, deskripsi, urutan, image } = updateData;
+    if (!judul || !kategori || !deskripsi || !urutan || !image) {
+      return res.status(400).json({ message: "Semua data harus diisi." });
+    }
+
     // Update hanya field yang dikirim dalam request
     await Tips.update(updateData, { where: { id } });
 
