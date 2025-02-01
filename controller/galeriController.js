@@ -14,13 +14,7 @@ const getGaleri = async (req, res) => {
 
 const createGaleri = async (req, res) => {
   try {
-    const { title, kategori, sub_kategori } = req.body;
-    const image = req.file ? req.file.path : null;
-
-    if (!title || !kategori || !sub_kategori || !image) {
-      return res.status(400).json({ message: "Semua data harus diisi." });
-    }
-
+    const { title, kategori, sub_kategori, image } = req.body;
     const galeri = await Galeri.create({ title, kategori, sub_kategori, image });
     res.status(201).json(galeri);
   } catch (error) {
