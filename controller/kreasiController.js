@@ -14,9 +14,8 @@ const getKreasis = async (req, res) => {
 
 const createKreasi = async (req, res) => {
   try {
-    const { kulit, badan } = req.body;
-    const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
-    const kreasi = await Kreasi.create({ kulit,badan, image: imagePath });
+    const { kulit, badan, image } = req.body;
+    const kreasi = await Kreasi.create({ kulit,badan, image });
     res.status(201).json(kreasi);
   } catch (error) {
     res.status(500).json({ message: "Gagal menambah kreasi" });
