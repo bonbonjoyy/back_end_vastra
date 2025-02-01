@@ -13,21 +13,21 @@ const getGaleri = async (req, res) => {
 };
 
 const createGaleri = async (req, res) => {
-    try {
-      const { title,kategori, sub_kategori, image } = req.body;
-      const galeri = await Galeri.create({
-        title, 
-        kategori, 
-        sub_kategori, 
-        image
-      });
-  
-      res.status(201).json(galeri);
-    } catch (error) {
-      console.error("Error while creating galeri:", error);
-      res.status(500).json({ message: "Gagal menambah Galeri" });
+  try {
+    const { title, kategori, sub_kategori } = req.body;
+    const image = req.file ? req.file.path : null;
+
+    if (!title || !kategori || !sub_kategori || !image) {
+      return res.status(400).json({ message: "Semua data harus diisi." });
     }
-  };
+
+    const galeri = await Galeri.create({ title, kategori, sub_kategori, image });
+    res.status(201).json(galeri);
+  } catch (error) {
+    console.error("Error creating galeri:", error);
+    res.status(500).json({ message: "Gagal menambah Galeri" });
+  }
+};
   
   const updateGaleri = async (req, res) => {
     try {
