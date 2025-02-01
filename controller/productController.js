@@ -78,18 +78,18 @@ const getProductsByCategory = async (req, res) => {
   const { category } = req.params;
 
   try {
-    console.log("Fetching products for category:", category); // Log the category for debugging
+    console.log("Fetching products for category:", category); // Log kategori untuk debugging
     const products = await Product.findAll({
-      where: { kategori: category },  // Ensure the 'kategori' field matches the database column
+      where: { kategori: category },  // Pastikan field 'kategori' sesuai dengan kolom di database
     });
 
     if (products.length === 0) {
       return res.status(404).json({ message: `No products found for category: ${category}` });
     }
 
-    res.json(products);
+    res.status(200).json(products); // Mengembalikan status 200 dan produk yang ditemukan
   } catch (error) {
-    console.error("Error fetching products by category:", error); // Log error for debugging
+    console.error("Error fetching products by category:", error); // Log error untuk debugging
     res.status(500).json({ message: "Error fetching products by category", error: error.message });
   }
 };
