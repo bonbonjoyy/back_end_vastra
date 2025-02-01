@@ -103,17 +103,35 @@ const deleteKreasi = async (req, res) => {
     const { id } = req.params;
     const kreasi = await Kreasi.findByPk(id);
 
-    if (!kreasi) return res.status(404).json({ message: "Kreasi tidak ditemukan" });
-
-    if (kreasi.image) {
-      const imagePath = path.join(__dirname, "../public", kreasi.image);
-      if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
+    if (!kreasi) {
+      console.error(`Kreasi dengan ID ${id} tidak ditemukan.`);
+      return res.status(404).json({ message: "Kreasi tidak ditemukan" });
     }
 
+    // Hapus gambar dari Supabase jika ada
+    if (kreasi.image) {
+      try {
+        // Ambil nama file dari URL Supabase
+        const imageUrlParts = kreasi.image.split("/");
+        const fileName = imageUrlParts[imageUrlParts.length - 1]; // Nama file terakhir dalam URL
+
+        // Hapus dari bucket Supabase (pastikan nama bucket sesuai dengan yang kamu pakai)
+        const { error } = await supabase.storage.from("images").remove([fileName]);
+
+        if (error) throw error;
+      } catch (error) {
+        console.error("Gagal menghapus file dari Supabase:", error);
+        return res.status(500).json({ message: "Gagal menghapus gambar dari storage." });
+      }
+    }
+
+    // Hapus data dari database
     await kreasi.destroy();
     res.status(200).json({ message: "Kreasi berhasil dihapus" });
+
   } catch (error) {
-    res.status(500).json({ message: "Gagal menghapus Kreasi" });
+    console.error("Error saat menghapus Kreasi:", error);
+    res.status(500).json({ message: "Terjadi kesalahan server saat menghapus Kreasi." });
   }
 };
 
