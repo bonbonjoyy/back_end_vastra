@@ -81,12 +81,6 @@ const updateKreasi = async (req, res) => {
       return res.status(400).json({ message: "Tidak ada data yang dikirim untuk diperbarui." });
     }
 
-    // Cek apakah semua field yang diperlukan ada
-    const { kulit, badan, image } = updateData;
-    if (!kulit || !badan || !image) {
-      return res.status(400).json({ message: "Semua data harus diisi." });
-    }
-
     // Update hanya field yang dikirim dalam request
     await Kreasi.update(updateData, { where: { id } });
 
