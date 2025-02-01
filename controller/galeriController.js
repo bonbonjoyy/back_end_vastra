@@ -14,14 +14,12 @@ const getGaleri = async (req, res) => {
 
 const createGaleri = async (req, res) => {
     try {
-      const { title,kategori, sub_kategori } = req.body;
-      const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
-  
+      const { title,kategori, sub_kategori, image } = req.body;
       const galeri = await Galeri.create({
         title, 
         kategori, 
         sub_kategori, 
-        image: imagePath
+        image
       });
   
       res.status(201).json(galeri);
@@ -34,41 +32,30 @@ const createGaleri = async (req, res) => {
   const updateGaleri = async (req, res) => {
     try {
       const { id } = req.params;
-      const { title,kategori, sub_kategori } = req.body;
+      const updateData = req.body; // Data yang akan diperbarui
       const existingGaleri = await Galeri.findByPk(id);
   
       if (!existingGaleri) {
-        return res.status(404).json({ message: "Galeri tidak ditemukan." });
+        return res.status(404).json({ message: "Tips tidak ditemukan." });
       }
   
-      if (!kategori || !sub_kategori || !title) {
+      // Cek apakah ada data yang dikirim untuk diupdate
+      if (Object.keys(updateData).length === 0) {
+        return res.status(400).json({ message: "Tidak ada data yang dikirim untuk diperbarui." });
+      }
+  
+      // Cek apakah semua field yang diperlukan ada
+      const { title, kategori, sub_kategori, image } = updateData;
+      if (!title || !kategori || !sub_kategori || !image) {
         return res.status(400).json({ message: "Semua data harus diisi." });
       }
   
-      let imagePath = existingGaleri.image; // Default to old image path
-      if (req.file) {
-        // Delete old image if a new one is provided
-        if (existingGaleri.image) {
-          const oldImagePath = path.join(__dirname, "../public", existingGaleri.image);
-          if (fs.existsSync(oldImagePath)) {
-            fs.unlinkSync(oldImagePath);
-          }
-        }
-        imagePath = `/uploads/${req.file.filename}`; // Set new image path
-      }
-  
-      const updatedGaleri = await Galeri.update(
-        { title,kategori, sub_kategori, image: imagePath },
-        { where: { id } }
-      );
-  
-      if (updatedGaleri[0] === 0) {
-        return res.status(404).json({ message: "Galeri tidak ditemukan." });
-      }
+      // Update hanya field yang dikirim dalam request
+      await Galeri.update(updateData, { where: { id } });
   
       res.status(200).json({ message: "Galeri berhasil diperbarui." });
     } catch (err) {
-      console.error("Error while updating galeri:", err);
+      console.error("Error saat mengupdate Galeri:", err);
       res.status(500).json({ message: "Terjadi kesalahan server." });
     }
   };
