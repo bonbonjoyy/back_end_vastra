@@ -14,9 +14,8 @@ const getProducts = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
-    console.log("Request body:", req.body); // Log untuk debug
-    const { nama_product, harga, stok, deskripsi, kategori, image } = req.body;
-    const product = await Product.create({ nama_product, harga, stok, deskripsi,kategori, image });
+    const { nama_product, harga, stok, deskripsi, image, kategori } = req.body;
+    const product = await Product.create({ nama_product, harga, stok, deskripsi, image, kategori });
     res.status(201).json(product);
   } catch (error) {
     console.error("Error saat menambah produk:", error); // Log error
