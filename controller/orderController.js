@@ -126,6 +126,8 @@ const updateOrderStatus = async (req, res) => {
   const { id } = req.params; 
   const { status, reject_comment } = req.body; // Tambahkan reject_comment
 
+  console.log("Updating order status:", { id, status, reject_comment }); // Log data yang diterima
+
   try {
     const order = await Order.findByPk(id);
     if (!order) {
@@ -137,9 +139,11 @@ const updateOrderStatus = async (req, res) => {
     // Jika pesanan ditolak, simpan alasan penolakan
     if (status === "Rejected") {
       order.reject_comment = reject_comment || "Tidak ada alasan diberikan"; 
+      console.log("Setting reject_comment:", order.reject_comment); // Log alasan penolakan
     }
 
     await order.save();
+    console.log("Updated order:", order); // Log order yang diperbarui
 
     res.status(200).json({ message: "Status order berhasil diperbarui", order });
   } catch (error) {
