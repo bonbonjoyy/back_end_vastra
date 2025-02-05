@@ -86,13 +86,13 @@ const uploadImage = async (req, res) => {
     const { orderId } = req.params;
     console.log("Received orderId:", orderId);
 
-    const file = req.file; // Mendapatkan file gambar dari request body
-    console.log("Received file:", file);
+    const { image } = req.body; // Mendapatkan URL gambar dari request body
+    console.log("Received image URL:", image);
 
-    // Validasi file upload
-    if (!file) {
-      console.log("No file uploaded");
-      return res.status(400).json({ message: "Tidak ada file yang diunggah." });
+    // Validasi URL gambar
+    if (!image) {
+      console.log("No image URL provided");
+      return res.status(400).json({ message: "Tidak ada URL gambar yang diunggah." });
     }
 
     // Cek apakah orderId ada
@@ -102,28 +102,8 @@ const uploadImage = async (req, res) => {
       return res.status(404).json({ message: "Pesanan tidak ditemukan." });
     }
 
-    // Nama file unik berdasarkan orderId dan timestamp
-    const fileName = `orders/${orderId}/${Date.now()}-${file.originalname}`;
-    console.log("Uploading file to Supabase with name:", fileName);
-
-    // Upload gambar ke Supabase Storage
-    const { data, error } = await supabase.storage
-      .from('images') // Sesuaikan dengan nama bucket di Supabase
-      .upload(fileName, file.buffer, {
-        contentType: file.mimetype,
-      });
-
-    if (error) {
-      console.error("Error uploading to Supabase:", error);
-      return res.status(500).json({ message: "Gagal mengunggah gambar ke Supabase.", error: error.message });
-    }
-
-    // Ambil URL gambar dari Supabase Storage
-    const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(fileName);
-    console.log("Public URL retrieved:", publicUrl);
-
     // Update database dengan URL gambar
-    order.image = publicUrl; // Simpan URL gambar
+    order.image = image; // Simpan URL gambar
     order.status = "Waiting Confirm"; // Ubah status pesanan
     await order.save(); // Simpan perubahan ke database
     console.log("Order updated with new image URL and status.");
@@ -131,7 +111,7 @@ const uploadImage = async (req, res) => {
     // Mengembalikan response dengan URL gambar
     res.status(200).json({
       message: "Gambar berhasil diunggah dan status diperbarui!",
-      image: publicUrl, // URL gambar dari Supabase
+      image: order.image, // URL gambar dari Supabase
       status: order.status, // Status baru
     });
   } catch (err) {
@@ -139,7 +119,6 @@ const uploadImage = async (req, res) => {
     res.status(500).json({ message: "Gagal mengunggah gambar.", error: err.message });
   }
 };
-
 
 
 const updateOrderStatus = async (req, res) => {
