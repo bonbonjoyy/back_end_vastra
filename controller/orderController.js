@@ -81,20 +81,24 @@ const getOrderDetail = async (req, res) => {
 };
 
 const uploadImage = async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: "Tidak ada file yang diunggah" });
-  }
-
-  const { orderId } = req.params;
-
   try {
-    // Mencari pesanan berdasarkan orderId
-    const order = await Order.findOne({
-      where: { id: orderId },
-    });
+    const { orderId } = req.params;
+    const { image } = req.body; // Mendapatkan gambar dari request body (jika ada)
+    
+    // Validasi file upload
+    if (!req.file) {
+      return res.status(400).json({ message: "Tidak ada file yang diunggah." });
+    }
 
+    // Cek apakah orderId ada
+    const order = await Order.findOne({ where: { id: orderId } });
     if (!order) {
-      return res.status(404).json({ message: "Pesanan tidak ditemukan" });
+      return res.status(404).json({ message: "Pesanan tidak ditemukan." });
+    }
+
+    // Validasi apakah gambar sudah disertakan dalam request body
+    if (!image) {
+      return res.status(400).json({ message: "Gambar tidak ditemukan dalam data yang dikirim." });
     }
 
     // Nama file unik berdasarkan orderId dan timestamp
@@ -112,22 +116,23 @@ const uploadImage = async (req, res) => {
     // Ambil URL gambar dari Supabase Storage
     const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(fileName);
 
-    // Update database dengan URL gambar dari Supabase
+    // Update database dengan URL gambar
     order.image = publicUrl; // Simpan URL gambar
-    order.status = "Waiting Confirm"; // Ubah status menjadi 'Waiting Confirm'
+    order.status = "Waiting Confirm"; // Ubah status pesanan
     await order.save(); // Simpan perubahan ke database
 
-    // Mengembalikan response dengan URL gambar dari Supabase
+    // Mengembalikan response dengan URL gambar
     res.status(200).json({
       message: "Gambar berhasil diunggah dan status diperbarui!",
       image: publicUrl, // URL gambar dari Supabase
       status: order.status, // Status baru
     });
-  } catch (error) {
-    console.error("Error mengunggah gambar:", error);
-    res.status(500).json({ message: "Gagal mengunggah gambar.", error: error.message });
+  } catch (err) {
+    console.error("Error saat mengunggah gambar:", err);
+    res.status(500).json({ message: "Gagal mengunggah gambar.", error: err.message });
   }
 };
+
 
 
 const updateOrderStatus = async (req, res) => {
