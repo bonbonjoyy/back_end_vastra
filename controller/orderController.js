@@ -85,13 +85,14 @@ const uploadImage = async (req, res) => {
     const { orderId } = req.params;
     console.log("Received orderId:", orderId);
 
-    const { image } = req.body; // Mendapatkan URL gambar dari request body
+    const { image, fileName } = req.body; // Mendapatkan URL gambar dan nama file dari request body
     console.log("Received image URL:", image);
+    console.log("Received file name:", fileName);
 
     // Validasi URL gambar
-    if (!image) {
-      console.log("No image URL provided");
-      return res.status(400).json({ message: "Tidak ada URL gambar yang diunggah." });
+    if (!image || !fileName) {
+      console.log("No image URL or file name provided");
+      return res.status(400).json({ message: "Tidak ada URL gambar atau nama file yang diunggah." });
     }
 
     // Cek apakah orderId ada
@@ -101,8 +102,9 @@ const uploadImage = async (req, res) => {
       return res.status(404).json({ message: "Pesanan tidak ditemukan." });
     }
 
-    // Update database dengan URL gambar
+    // Update database dengan URL gambar dan nama file
     order.image = image; // Simpan URL gambar
+    order.fileName = fileName; // Simpan nama file
     order.status = "Waiting Confirm"; // Ubah status pesanan
     await order.save(); // Simpan perubahan ke database
     console.log("Order updated with new image URL and status.");
@@ -111,6 +113,7 @@ const uploadImage = async (req, res) => {
     res.status(200).json({
       message: "Gambar berhasil diunggah dan status diperbarui!",
       image: order.image, // URL gambar dari Supabase
+      fileName: order.fileName, // Nama file
       status: order.status, // Status baru
     });
   } catch (err) {
