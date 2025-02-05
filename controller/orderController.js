@@ -86,42 +86,33 @@ const uploadImage = async (req, res) => {
   }
 
   const { orderId } = req.params;
-  const file = req.file;
-  const filePath = `orders/${orderId}/${file.filename}`; // Path unik di Supabase Storage
+  const imagePath = `/uploads/${req.file.filename}`; // Path gambar
 
   try {
-    // Upload gambar ke Supabase Storage
-    const { data, error } = await supabase.storage
-      .from("images") // Ganti dengan nama bucket kamu
-      .upload(filePath, file.buffer, { contentType: file.mimetype });
+    // Mencari pesanan berdasarkan orderId
+    const order = await Order.findOne({
+      where: { id: orderId },
+    });
 
-    if (error) {
-      throw new Error("Gagal mengunggah gambar ke Supabase");
-    }
-
-    // Ambil URL publik dari gambar yang diunggah
-    const { publicURL } = supabase.storage.from("images").getPublicUrl(filePath);
-
-    // Cek apakah order ada di database
-    const order = await Order.findOne({ where: { id: orderId } });
     if (!order) {
       return res.status(404).json({ message: "Pesanan tidak ditemukan" });
     }
 
-    // Simpan URL gambar ke database & ubah status
-    order.image = publicURL;
-    order.status = "Waiting Confirm";
-    await order.save();
+    // Update kolom 'image' dengan path gambar dan ubah status menjadi 'Waiting Confirm'
+    order.image = imagePath; // Menyimpan path gambar di kolom 'image'
+    order.status = "Waiting Confirm"; // Mengubah status menjadi 'Waiting Confirm'
+    await order.save(); // Simpan perubahan ke database
 
-    // Kirim respons
+    // Mengembalikan response dengan status dan path gambar yang baru
     res.status(200).json({
       message: "Gambar berhasil diunggah dan status diperbarui!",
-      image: publicURL,
-      status: order.status,
+      image: imagePath, // Kembalikan path gambar
+      status: order.status, // Kembalikan status baru
     });
-  } catch (error) {
+  }
+   catch (error) {
     console.error("Error mengunggah gambar:", error);
-    res.status(500).json({ message: "Gagal mengunggah gambar." });
+    // res.status(500).json({ message: "Gagal mengunggah gambar." });
   }
 };
 
