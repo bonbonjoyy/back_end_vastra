@@ -41,6 +41,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
+      reject_comment: {
+        type: DataTypes.TEXT, // Atau DataTypes.TEXT jika Anda ingin menyimpan lebih banyak karakter
+        allowNull: true, // Atur sesuai kebutuhan
+      },
     },
     {
       sequelize,
