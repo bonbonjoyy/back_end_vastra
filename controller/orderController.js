@@ -80,13 +80,14 @@ const getOrderDetail = async (req, res) => {
   }
 };
 
+// Fungsi untuk menangani upload gambar
 const uploadImage = async (req, res) => {
   try {
     const { orderId } = req.params;
-    const { image } = req.body; // Mendapatkan gambar dari request body (jika ada)
+    const file = req.file; // Mendapatkan file gambar dari request body
     
     // Validasi file upload
-    if (!req.file) {
+    if (!file) {
       return res.status(400).json({ message: "Tidak ada file yang diunggah." });
     }
 
@@ -96,19 +97,14 @@ const uploadImage = async (req, res) => {
       return res.status(404).json({ message: "Pesanan tidak ditemukan." });
     }
 
-    // Validasi apakah gambar sudah disertakan dalam request body
-    if (!image) {
-      return res.status(400).json({ message: "Gambar tidak ditemukan dalam data yang dikirim." });
-    }
-
     // Nama file unik berdasarkan orderId dan timestamp
-    const fileName = `orders/${orderId}/${Date.now()}-${req.file.originalname}`;
+    const fileName = `orders/${orderId}/${Date.now()}-${file.originalname}`;
 
     // Upload gambar ke Supabase Storage
     const { data, error } = await supabase.storage
       .from('images') // Sesuaikan dengan nama bucket di Supabase
-      .upload(fileName, req.file.buffer, {
-        contentType: req.file.mimetype,
+      .upload(fileName, file.buffer, {
+        contentType: file.mimetype,
       });
 
     if (error) throw error;
