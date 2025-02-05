@@ -80,7 +80,6 @@ const getOrderDetail = async (req, res) => {
   }
 };
 
-// Fungsi untuk menangani upload gambar
 const uploadImage = async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -119,6 +118,7 @@ const uploadImage = async (req, res) => {
     res.status(500).json({ message: "Gagal mengunggah gambar.", error: err.message });
   }
 };
+
 
 
 const updateOrderStatus = async (req, res) => {
