@@ -84,21 +84,27 @@ const getOrderDetail = async (req, res) => {
 const uploadImage = async (req, res) => {
   try {
     const { orderId } = req.params;
+    console.log("Received orderId:", orderId);
+
     const file = req.file; // Mendapatkan file gambar dari request body
-    
+    console.log("Received file:", file);
+
     // Validasi file upload
     if (!file) {
+      console.log("No file uploaded");
       return res.status(400).json({ message: "Tidak ada file yang diunggah." });
     }
 
     // Cek apakah orderId ada
     const order = await Order.findOne({ where: { id: orderId } });
     if (!order) {
+      console.log("Order not found for orderId:", orderId);
       return res.status(404).json({ message: "Pesanan tidak ditemukan." });
     }
 
     // Nama file unik berdasarkan orderId dan timestamp
     const fileName = `orders/${orderId}/${Date.now()}-${file.originalname}`;
+    console.log("Uploading file to Supabase with name:", fileName);
 
     // Upload gambar ke Supabase Storage
     const { data, error } = await supabase.storage
@@ -107,15 +113,20 @@ const uploadImage = async (req, res) => {
         contentType: file.mimetype,
       });
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error uploading to Supabase:", error);
+      return res.status(500).json({ message: "Gagal mengunggah gambar ke Supabase.", error: error.message });
+    }
 
     // Ambil URL gambar dari Supabase Storage
     const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(fileName);
+    console.log("Public URL retrieved:", publicUrl);
 
     // Update database dengan URL gambar
     order.image = publicUrl; // Simpan URL gambar
     order.status = "Waiting Confirm"; // Ubah status pesanan
     await order.save(); // Simpan perubahan ke database
+    console.log("Order updated with new image URL and status.");
 
     // Mengembalikan response dengan URL gambar
     res.status(200).json({
