@@ -122,11 +122,9 @@ const uploadImage = async (req, res) => {
   }
 };
 
-
-
 const updateOrderStatus = async (req, res) => {
   const { id } = req.params; 
-  const { status } = req.body; 
+  const { status, reject_comment } = req.body; // Tambahkan reject_comment
 
   try {
     const order = await Order.findByPk(id);
@@ -135,31 +133,13 @@ const updateOrderStatus = async (req, res) => {
     }
 
     order.status = status;
-    await order.save();
 
-    // Jika status pesanan diterima (Accepted), kita perbarui stok produk
-    if (status === "Accepted") {
-      for (const item of order.items) {
-        const product = await Product.findByPk(item.id);
-        if (product) {
-          if (product.stok >= item.quantity) {
-            product.stok -= item.quantity;
-            await product.save(); 
-            console.log(`Stok produk ${product.id} berhasil diperbarui. Sisa stok: ${product.stok}`);
-          } else {
-            console.error(`Stok produk ${product.id} tidak cukup.`);
-            return res.status(400).json({ message: `Stok produk ${product.id} tidak cukup` });
-          }
-        } else {
-          console.error(`Produk dengan ID ${item.id} tidak ditemukan`);
-        }
-      }
-    }
-
-    // Jika status pesanan ditolak (Rejected), tidak ada perubahan stok, cukup update status
+    // Jika pesanan ditolak, simpan alasan penolakan
     if (status === "Rejected") {
-      console.log(`Pesanan ${order.id} telah ditolak.`);
+      order.reject_comment = reject_comment || "Tidak ada alasan diberikan"; 
     }
+
+    await order.save();
 
     res.status(200).json({ message: "Status order berhasil diperbarui", order });
   } catch (error) {
@@ -168,8 +148,6 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
-
-  
 module.exports = { 
   getOrder,
   getOrdersByUserId,
