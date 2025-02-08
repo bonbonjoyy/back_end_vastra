@@ -141,17 +141,13 @@ const createUser = async (req, res) => {
   }
 };
 
-
 const updateUser  = async (req, res) => {
   try {
-    // Ambil ID pengguna dari token
-    const userIdFromToken = req.user.id; // Pastikan req.user diisi oleh middleware
+    const userIdFromToken = req.user.id; // ID pengguna dari token
+    const { id } = req.params; // ID pengguna dari parameter
 
-    // Ambil ID dari parameter
-    const { id } = req.params;
-
-    // Pastikan ID dari parameter sama dengan ID dari token
-    if (userIdFromToken !== id) {
+    // Cek apakah pengguna adalah admin atau memperbarui data mereka sendiri
+    if (req.user.role !== 'admin' && userIdFromToken !== id) {
       return res.status(403).json({ message: "Akses ditolak" });
     }
 
@@ -318,7 +314,6 @@ const resetPassword = async (req, res) => {
     });
   }
 };
-
 
 module.exports = {
   loginUser,
