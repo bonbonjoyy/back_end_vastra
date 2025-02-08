@@ -84,7 +84,7 @@ const getUserById = async (req, res) => {
   }
 };
 
-const createUser = async (req, res) => {
+const createUser  = async (req, res) => {
   const { nama_lengkap, email, username, kata_sandi, role } = req.body;
 
   try {
@@ -115,14 +115,14 @@ const createUser = async (req, res) => {
       nama_lengkap,
       email,
       username,
-      kata_sandi: hashedPassword, // Password langsung disimpan tanpa enkripsi
+      kata_sandi: hashedPassword,
       role: userRole,
       profile_image: req.file ? `/uploads/${req.file.filename}` : null, // Gambar profil jika ada
     });
 
     // Response jika user berhasil dibuat
     res.status(201).json({
-      message: "User berhasil dibuat",
+      message: "User  berhasil dibuat",
       user: {
         id: user.id,
         nama_lengkap: user.nama_lengkap,
