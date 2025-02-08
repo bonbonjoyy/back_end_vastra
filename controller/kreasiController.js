@@ -81,7 +81,6 @@ const updateKreasi = async (req, res) => {
       return res.status(400).json({ message: "Tidak ada data yang dikirim untuk diperbarui." });
     }
 
-
     // Update hanya field yang dikirim dalam request
     await Kreasi.update(updateData, { where: { id } });
 

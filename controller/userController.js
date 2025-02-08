@@ -84,10 +84,10 @@ const getUserById = async (req, res) => {
   }
 };
 
-const createUser = async (req, res) => {
-  const { nama_lengkap, email, username, kata_sandi, role } = req.body;
-
+const createUser  = async (req, res) => {
   try {
+    const { nama_lengkap, email, username, kata_sandi, role } = req.body;
+
     // Validasi field yang wajib diisi
     if (!nama_lengkap || !email || !username || !kata_sandi) {
       return res.status(400).json({ message: "Data tidak lengkap" });
@@ -105,24 +105,30 @@ const createUser = async (req, res) => {
       return res.status(400).json({ message: "Email sudah digunakan" });
     }
 
+    // Hash password
     const hashedPassword = await bcrypt.hash(kata_sandi, 10);
-
-    // Default role jika tidak diberikan
     const userRole = role || "user";
+
+    // Jika ada file gambar, unggah ke Supabase
+    let profileImageUrl = null;
+    if (req.file) {
+      const fileName = `${Date.now()}_${req.file.originalname}`; // Membuat nama file unik
+      profileImageUrl = await uploadToSupabase(fileName, req.file.buffer); // Mengunggah gambar
+    }
 
     // Menyimpan data user baru
     const user = await User.create({
       nama_lengkap,
       email,
       username,
-      kata_sandi: hashedPassword, // Password langsung disimpan tanpa enkripsi
+      kata_sandi: hashedPassword,
       role: userRole,
-      profile_image: req.file ? `/uploads/${req.file.filename}` : null, // Gambar profil jika ada
+      profile_image: profileImageUrl, // Simpan URL gambar
     });
 
     // Response jika user berhasil dibuat
     res.status(201).json({
-      message: "User berhasil dibuat",
+      message: "User  berhasil dibuat",
       user: {
         id: user.id,
         nama_lengkap: user.nama_lengkap,
@@ -134,66 +140,7 @@ const createUser = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
-      message: "Terjadi kesalahan pada server",
-      error: error.message,
-    });
-  }
-};
-
-const updateUser  = async (req, res) => {
-  try {
-    const userIdFromToken = req.user.id; // ID pengguna dari token
-    const { id } = req.params; // ID pengguna dari parameter
-
-    // Cek apakah pengguna adalah admin atau memperbarui data mereka sendiri
-    if (req.user.role !== 'admin' && userIdFromToken !== id) {
-      return res.status(403).json({ message: "Akses ditolak" });
-    }
-
-    const user = await User.findByPk(id);
-    if (!user) {
-      return res.status(404).json({ message: "Pengguna tidak ditemukan" });
-    }
-
-    const updates = {};
-    const { sandi_saat_ini, kata_sandi, ...rest } = req.body;
-
-    // Validasi kata sandi saat ini jika diberikan
-    if (sandi_saat_ini) {
-      const isMatch = await bcrypt.compare(sandi_saat_ini, user.kata_sandi);
-      if (!isMatch) {
-        return res.status(401).json({ message: "Sandi saat ini tidak valid" });
-      }
-    }
-
-    // Hanya tambahkan field yang ada di body
-    for (const key in rest) {
-      if (rest[key] !== undefined) {
-        updates[key] = rest[key];
-      }
-    }
-
-    // Hash kata sandi baru jika diberikan
-    if (kata_sandi) {
-      updates.kata_sandi = await bcrypt.hash(kata_sandi, 10);
-    }
-
-    await User.update(updates, {
-      where: { id },
-    });
-
-    const updatedUser  = await User.findByPk(id);
-    res.status(200).json({
-      message: "User  berhasil diupdate",
-      user: updatedUser ,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Gagal update user",
-      error: error.message,
-    });
+    res.status(500).json({ message: "Gagal menambah pengguna" });
   }
 };
 
