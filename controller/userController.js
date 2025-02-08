@@ -151,10 +151,15 @@ const updateUser  = async (req, res) => {
       return res.status(403).json({ message: "Akses ditolak" });
     }
 
-    const { sandi_saat_ini, kata_sandi } = req.body; // Ambil sandi saat ini dari body
     const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ message: "Pengguna tidak ditemukan" });
+    }
 
-    // Validasi kata sandi saat ini
+    const updates = {};
+    const { sandi_saat_ini, kata_sandi, ...rest } = req.body;
+
+    // Validasi kata sandi saat ini jika diberikan
     if (sandi_saat_ini) {
       const isMatch = await bcrypt.compare(sandi_saat_ini, user.kata_sandi);
       if (!isMatch) {
@@ -162,17 +167,16 @@ const updateUser  = async (req, res) => {
       }
     }
 
-    const updates = { ...req.body };
-
-    if (req.file) {
-      updates.profile_image = `/uploads/${req.file.filename}`;
+    // Hanya tambahkan field yang ada di body
+    for (const key in rest) {
+      if (rest[key] !== undefined) {
+        updates[key] = rest[key];
+      }
     }
 
-    // Hash kata sandi baru jika diberikan dalam update
+    // Hash kata sandi baru jika diberikan
     if (kata_sandi) {
       updates.kata_sandi = await bcrypt.hash(kata_sandi, 10);
-    } else {
-      delete updates.kata_sandi; // Hapus kata_sandi jika kosong
     }
 
     await User.update(updates, {
