@@ -7,9 +7,9 @@ const getGaleri = async (req, res) => {
   try {
     const galeri = await Galeri.findAll();
     
-    // Mengurutkan galeri berdasarkan nama dengan localeCompare
+    // Mengurutkan galeri berdasarkan title dengan localeCompare
     const sortedGaleri = galeri.sort((a, b) => {
-      return a.nama.localeCompare(b.nama, undefined, { numeric: true, sensitivity: 'base' });
+      return a.title.localeCompare(b.title, undefined, { numeric: true, sensitivity: 'base' });
     });
 
     res.status(200).json(sortedGaleri);
