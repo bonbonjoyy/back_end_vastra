@@ -6,7 +6,19 @@ const fs = require("fs");
 const getGaleri = async (req, res) => {
   try {
     const galeri = await Galeri.findAll();
-    res.status(200).json(galeri);
+    
+    // Mengurutkan galeri berdasarkan nama
+    const sortedGaleri = galeri.sort((a, b) => {
+      if (a.nama < b.nama) {
+        return -1; // a sebelum b
+      }
+      if (a.nama > b.nama) {
+        return 1; // a setelah b
+      }
+      return 0; // a dan b sama
+    });
+
+    res.status(200).json(sortedGaleri);
   } catch (error) {
     res.status(500).json({ message: "Terjadi kesalahan saat mengambil Galeri" });
   }
