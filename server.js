@@ -9,21 +9,12 @@ const app = express();
 const port = process.env.PORT || 3333;
 
 // Middleware untuk mengelola CORS
-const allowedOrigins = [
-  process.env.CLIENT_URL || "https://vastra-iota.vercel.app",
-  "https://vastra-cgrefthq2-rizkys-projects-2394185d.vercel.app",
-  "http://localhost:5173",
-];
-
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: [
+      "https://vastra-iota.vercel.app",
+      "https://vastra-cgrefthq2-rizkys-projects-2394185d.vercel.app"
+    ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     exposedHeaders: ["Content-Type", "Authorization"],
