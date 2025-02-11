@@ -11,7 +11,7 @@ const port = process.env.PORT || 3333;
 // Middleware untuk mengelola CORS
 app.use(
   cors({
-    origin: "https://vastra-iota.vercel.app",
+    origin: process.env.CLIENT_URL || "https://vastra-iota.vercel.app",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     exposedHeaders: ["Content-Type", "Authorization"],
