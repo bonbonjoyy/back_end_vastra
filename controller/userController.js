@@ -3,39 +3,49 @@ const { User } = require("../models"); // Pastikan untuk import User model
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const {kirimEmail } = require('../helpers');
+const { Op } = require("sequelize");
 
 const loginUser = async (req, res) => {
-  const { email, username, kata_sandi } = req.body;
-
   try {
+    const { emailOrUsername, password } = req.body;
+
+    if (!emailOrUsername || !password) {
+      return res.status(400).json({ message: "Email/Username dan Password wajib diisi!" });
+    }
+
+    // Cari user berdasarkan email atau username
     const user = await User.findOne({
       where: {
-        [Sequelize.Op.or]: [
-          { email },  // Cari berdasarkan email
-          { username }, // atau username
-        ],
+        [Op.or]: [{ email: emailOrUsername }, { username: emailOrUsername }],
       },
     });
 
     if (!user) {
-      return res.status(400).json({ message: 'Username or email or password is incorrect' });
+      return res.status(401).json({ message: "User tidak ditemukan!" });
     }
 
-    const isMatch = await bcrypt.compare(kata_sandi, user.kata_sandi);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Username or email or password is incorrect' });
+    // Jika email yang dimasukkan berbeda dengan yang ada di database, perbarui email user
+    if (emailOrUsername !== user.email && emailOrUsername.includes("@")) {
+      await user.update({ email: emailOrUsername });
     }
 
+    // Cek password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Password salah!" });
+    }
+
+    // Generate JWT token
     const token = jwt.sign(
-      { user: { id: user.id, email: user.email, username: user.username, role: user.role } },
+      { id: user.id, email: user.email, username: user.username },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: "1h" }
     );
 
-    res.json({ token });
+    return res.status(200).json({ message: "Login berhasil", token });
   } catch (error) {
-    console.log(error.message);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("Error saat login:", error);
+    return res.status(500).json({ message: "Terjadi kesalahan server!" });
   }
 };
 
