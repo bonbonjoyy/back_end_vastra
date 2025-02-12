@@ -7,11 +7,11 @@ const { Op } = require("sequelize");
 
 const loginUser  = async (req, res) => {
   try {
-    const { email, username, kata_sandi } = req.body;
+    const { email, kata_sandi } = req.body; // Hanya ambil email dan kata_sandi
 
     // Validasi input
-    if (!email || !username || !kata_sandi) {
-      return res.status(400).json({ message: "Email, Username, dan Kata Sandi wajib diisi!" });
+    if (!email || !kata_sandi) {
+      return res.status(400).json({ message: "Email dan Kata Sandi wajib diisi!" });
     }
 
     // Cari user berdasarkan email
@@ -26,21 +26,15 @@ const loginUser  = async (req, res) => {
       return res.status(401).json({ message: "Email tidak ditemukan!" });
     }
 
-    // Jika email ditemukan, cek apakah username cocok
-    // Pastikan username yang diberikan sama dengan username yang terdaftar
-    if (user.username !== username) {
-      return res.status(401).json({ message: "Username tidak sesuai dengan email!" });
-    }
-
     // Cek password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(kata_sandi, user.kata_sandi); // Ganti 'password' dengan 'kata_sandi'
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "Password salah!" });
+      return res.status(401).json({ message: "Kata Sandi salah!" });
     }
 
     // Generate JWT token
     const token = jwt.sign(
-      { id: user.id, email: user.email, username: user.username },
+      { id: user.id, email: user.email, username: user.username }, // Anda masih bisa menyertakan username jika diperlukan
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
