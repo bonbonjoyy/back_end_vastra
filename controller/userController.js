@@ -255,7 +255,7 @@ const forgotPassword = async (req, res) => {
       subject: 'Link Reset Password',
       html: `
       <p>Silahkan klik link dibawah untuk reset password anda</p> 
-      <p><a href="${process.env.CLIENT_URL}/resetpassword/${token}">Reset Password</a></p>
+      <p><a href="https://vastra-iota.vercel.app/resetpassword/${token}">Reset Password</a></p>
       `
     }
     kirimEmail(templateEmail)
