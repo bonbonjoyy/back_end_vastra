@@ -8,35 +8,29 @@ const router = express.Router();
 const googleClient = require("../config/googleAuth");
 
 router.post('/login', async (req, res) => {
-  const { email, username, kata_sandi } = req.body;
+  const { email, kata_sandi } = req.body; // Hanya ambil email dan kata_sandi
 
-  if (!email || !username || !kata_sandi) {
-    return res.status(400).json({ message: "Email, username, dan kata sandi harus diisi" });
+  // Validasi input
+  if (!email || !kata_sandi) {
+    return res.status(400).json({ message: "Email dan kata sandi harus diisi" });
   }
 
   try {
-    // Menemukan user berdasarkan email atau username dan kata_sandi
+    // Menemukan user berdasarkan email
     const user = await User.findOne({
       where: {
-        [Op.and]: [
-          {
-            [Op.or]: [
-              { email }, // Cek apakah email cocok
-              { username }, // Cek apakah username cocok
-            ],
-          },
-        ],
+        email: email, // Cek apakah email cocok
       },
     });
 
     if (!user) {
-      return res.status(401).json({ message: 'Email/Username atau kata sandi salah' });
+      return res.status(401).json({ message: 'Email atau kata sandi salah' });
     }
 
     // Verifikasi password menggunakan bcrypt
     const isPasswordValid = await bcrypt.compare(kata_sandi, user.kata_sandi); // Compare hashed password
     if (!isPasswordValid) {
-      return res.status(401).json({ message: 'Email/Username atau kata sandi salah' });
+      return res.status(401).json({ message: 'Email atau kata sandi salah' });
     }
 
     // Update last_login
@@ -48,7 +42,6 @@ router.post('/login', async (req, res) => {
       {
         user: {
           id: user.id,
-          username: user.username,
           email: user.email,
           role: user.role,
         },
@@ -63,7 +56,6 @@ router.post('/login', async (req, res) => {
       token,
       user: {
         id: user.id,
-        username: user.username,
         email: user.email,
         role: user.role,
         isFirstLogin, // Informasi apakah ini login pertama
