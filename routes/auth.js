@@ -8,6 +8,7 @@ const router = express.Router();
 const googleClient = require("../config/googleAuth");
 
 router.post('/login', async (req, res) => {
+  console.log("Request body:", req.body); // Tambahkan log ini
   const { email, kata_sandi } = req.body; // Hanya ambil email dan kata_sandi
 
   // Validasi input

@@ -5,7 +5,8 @@ const bcrypt = require('bcryptjs');
 const {kirimEmail } = require('../helpers');
 const { Op } = require("sequelize");
 
-const loginUser  = async (req, res) => {
+const loginUser   = async (req, res) => {
+  console.log("Request body:", req.body); // Tambahkan log ini
   try {
     const { email, kata_sandi } = req.body; // Hanya ambil email dan kata_sandi
 
