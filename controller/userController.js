@@ -7,31 +7,26 @@ const { Op } = require("sequelize");
 
 const loginUser = async (req, res) => {
   try {
-    const { emailOrUsername, password } = req.body;
+    const { email, username, password } = req.body;
 
-    if (!emailOrUsername || !password) {
-      return res.status(400).json({ message: "Email/Username dan Password wajib diisi!" });
+    if (!email || !username || !password) {
+      return res.status(400).json({ message: "Email, Username, dan Password wajib diisi!" });
     }
 
-    // Cari user berdasarkan email atau username yang benar-benar ada di database
+    // Cari user berdasarkan email
     const user = await User.findOne({
       where: {
-        [Op.or]: [{ email: emailOrUsername }, { username: emailOrUsername }],
+        email: email, // mencari berdasarkan email
       },
     });
 
     if (!user) {
-      return res.status(401).json({ message: "User tidak ditemukan!" });
+      return res.status(401).json({ message: "Email tidak ditemukan!" });
     }
 
-    // **Perbaikan:** Pastikan username harus sesuai dengan database
-    if (emailOrUsername !== user.email && emailOrUsername !== user.username) {
-      return res.status(401).json({ message: "Email atau username tidak valid!" });
-    }
-
-    // **Perbaikan:** Jika email diubah, hanya email terbaru yang bisa digunakan untuk login
-    if (emailOrUsername.includes("@") && emailOrUsername !== user.email) {
-      return res.status(401).json({ message: "Gunakan email terbaru untuk login!" });
+    // Jika email ditemukan, cek apakah username cocok dengan user yang ditemukan
+    if (user.username !== username) {
+      return res.status(401).json({ message: "Username tidak sesuai dengan email!" });
     }
 
     // Cek password
