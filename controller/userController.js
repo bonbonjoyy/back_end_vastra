@@ -34,7 +34,7 @@ const loginUser  = async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { id: user.id, email: user.email, username: user.username }, // Anda masih bisa menyertakan username jika diperlukan
+      { id: user.id, email: user.email }, // Hanya menyertakan id dan email
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
