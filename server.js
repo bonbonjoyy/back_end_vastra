@@ -13,7 +13,8 @@ app.use(
   cors({
     origin: [
       "https://vastra-iota.vercel.app",
-      "https://vastra-cgrefthq2-rizkys-projects-2394185d.vercel.app"
+      "https://vastra-cgrefthq2-rizkys-projects-2394185d.vercel.app",
+      "http://localhost:5173"
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
