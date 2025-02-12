@@ -5,12 +5,13 @@ const bcrypt = require('bcryptjs');
 const {kirimEmail } = require('../helpers');
 const { Op } = require("sequelize");
 
-const loginUser = async (req, res) => {
+const loginUser  = async (req, res) => {
   try {
-    const { email, username, password } = req.body;
+    const { email, username, kata_sandi } = req.body;
 
-    if (!email || !username || !password) {
-      return res.status(400).json({ message: "Email, Username, dan Password wajib diisi!" });
+    // Validasi input
+    if (!email || !username || !kata_sandi) {
+      return res.status(400).json({ message: "Email, Username, dan Kata Sandi wajib diisi!" });
     }
 
     // Cari user berdasarkan email
@@ -20,11 +21,13 @@ const loginUser = async (req, res) => {
       },
     });
 
+    // Jika email tidak ditemukan
     if (!user) {
       return res.status(401).json({ message: "Email tidak ditemukan!" });
     }
 
-    // Jika email ditemukan, cek apakah username cocok dengan user yang ditemukan
+    // Jika email ditemukan, cek apakah username cocok
+    // Pastikan username yang diberikan sama dengan username yang terdaftar
     if (user.username !== username) {
       return res.status(401).json({ message: "Username tidak sesuai dengan email!" });
     }
