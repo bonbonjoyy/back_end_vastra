@@ -258,7 +258,7 @@ const forgotPassword = async (req, res) => {
       <p><a href="https://vastra-iota.vercel.app/resetpassword/${token}">Reset Password</a></p>
       `
     }
-    kirimEmail(templateEmail)
+    await kirimEmail(templateEmail);
 
     return res.status(200).json({
       status: true,

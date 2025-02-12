@@ -11,6 +11,9 @@ exports.kirimEmail = dataEmail => {
           pass: "nhwi mdbp irbw rbqw",
         },
       });
+
+      console.log("Mengirim email dengan data:", dataEmail);
+
     return (
         transporter.sendMail(dataEmail)
         .then(info => console.log(`Email Terkirim': ${info.message}`))
