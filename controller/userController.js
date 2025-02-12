@@ -13,7 +13,7 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Email/Username dan Password wajib diisi!" });
     }
 
-    // Cari user berdasarkan email atau username
+    // Cari user berdasarkan email atau username yang benar-benar ada di database
     const user = await User.findOne({
       where: {
         [Op.or]: [{ email: emailOrUsername }, { username: emailOrUsername }],
@@ -24,9 +24,14 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ message: "User tidak ditemukan!" });
     }
 
-    // Jika email yang dimasukkan berbeda dengan yang ada di database, perbarui email user
-    if (emailOrUsername !== user.email && emailOrUsername.includes("@")) {
-      await user.update({ email: emailOrUsername });
+    // **Perbaikan:** Pastikan username harus sesuai dengan database
+    if (emailOrUsername !== user.email && emailOrUsername !== user.username) {
+      return res.status(401).json({ message: "Email atau username tidak valid!" });
+    }
+
+    // **Perbaikan:** Jika email diubah, hanya email terbaru yang bisa digunakan untuk login
+    if (emailOrUsername.includes("@") && emailOrUsername !== user.email) {
+      return res.status(401).json({ message: "Gunakan email terbaru untuk login!" });
     }
 
     // Cek password
