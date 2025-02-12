@@ -276,46 +276,44 @@ const forgotPassword = async (req, res) => {
 
 const resetPassword = async (req, res) => {
   const { token, newPassword } = req.body;
-  console.log('token', token);
-  console.log('newPassword', newPassword);
+  console.log('Received token:', token);
+  console.log('New password:', newPassword);
 
   try {
-    // Cari pengguna berdasarkan token resetPasswordLink
     const user = await User.findOne({
       where: { resetPasswordLink: token },
     });
 
-    // Jika pengguna tidak ditemukan
     if (!user) {
+      console.log('User  not found for token:', token);
       return res.status(404).json({
         status: false,
         message: 'Token tidak valid atau pengguna tidak ditemukan.',
       });
     }
 
-    // Validasi token menggunakan jsonwebtoken
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log('Decoded token:', decoded);
 
-      // Jika token valid, enkripsi password baru dan perbarui
-      const encryptedPassword = await bcrypt.hash(newPassword, 10); // Mengenkripsi password baru dengan bcrypt
-
-      user.kata_sandi = encryptedPassword; // Set password terenkripsi
-      user.resetPasswordLink = ''; // Kosongkan resetPasswordLink setelah reset berhasil
-      await user.save(); // Simpan perubahan ke database
+      const encryptedPassword = await bcrypt.hash(newPassword, 10);
+      user.kata_sandi = encryptedPassword;
+      user.resetPasswordLink = '';
+      await user.save();
 
       return res.status(200).json({
         status: true,
         message: 'Password berhasil diperbarui.',
       });
     } catch (err) {
+      console.log('Token verification failed:', err);
       return res.status(400).json({
         status: false,
         message: 'Token kadaluarsa atau tidak valid.',
       });
     }
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error in resetPassword:', error);
     return res.status(500).json({
       status: false,
       message: 'Terjadi kesalahan pada server.',

@@ -152,6 +152,9 @@ router.use((err, req, res, next) => {
 });
 
 router.put('/forgotpassword', forgotPassword);
-router.put('/resetpassword', resetPassword);
+router.put('/resetpassword', (req, res) => {
+    console.log('Reset password route hit');
+    resetPassword(req, res);
+  });
 
 module.exports = router;
