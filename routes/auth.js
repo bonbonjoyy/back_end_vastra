@@ -215,4 +215,57 @@ router.post("/google-login", async (req, res) => {
   }
 });
 
+
+// Menangani callback dari Google OAuth
+router.get("/auth/google/callback", async (req, res) => {
+  try {
+    const { token } = req.query; // Ambil token dari query string
+    const ticket = await googleClient.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const { email, name, picture } = ticket.getPayload();
+
+    // Cari user berdasarkan email
+    let user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      // Jika user belum ada, buat user baru
+      user = await User.create({
+        username: email.split("@")[0], // Gunakan bagian depan email sebagai username
+        email,
+        nama_lengkap: name,
+        profile_image: picture,
+        role: "user",
+        kata_sandi: Math.random().toString(36).slice(-8), // Generate random password
+        is_google_account: true,
+      });
+    }
+
+    // Update last_login
+    await User.update({ last_login: new Date() }, { where: { id: user.id } });
+
+    const jwtToken = jwt.sign(
+      {
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+        },
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    // Redirect ke frontend dengan token
+    res.redirect(`https://vastra-iota.vercel.app/dashboard?token=${jwtToken}`);
+  } catch (error) {
+    console.error("Google callback error:", error);
+    res.redirect(`https://vastra-iota.vercel.app/login?error=true`);
+  }
+});
+
+
 module.exports = router;
