@@ -154,7 +154,6 @@ router.post("/reset-password-direct", async (req, res) => {
   }
 });
 
-const bcrypt = require("bcryptjs");
 
 router.post("/google-login", async (req, res) => {
   try {
