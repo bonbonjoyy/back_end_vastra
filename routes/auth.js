@@ -154,7 +154,6 @@ router.post("/reset-password-direct", async (req, res) => {
   }
 });
 
-
 router.post("/google-login", async (req, res) => {
   try {
     const { token } = req.body;
@@ -169,18 +168,14 @@ router.post("/google-login", async (req, res) => {
     let user = await User.findOne({ where: { email } });
 
     if (!user) {
-      // Generate random password
-      const randomPassword = Math.random().toString(36).slice(-8);
-      const hashedPassword = await bcrypt.hash(randomPassword, 10);
-
-      // Jika user belum ada, buat user baru dengan kata sandi terenkripsi
+      // Jika user belum ada, buat user baru
       user = await User.create({
         username: email.split("@")[0], // Gunakan bagian depan email sebagai username
         email,
         nama_lengkap: name,
         profile_image: picture,
         role: "user",
-        kata_sandi: hashedPassword, // Simpan kata sandi yang sudah di-hash
+        kata_sandi: Math.random().toString(36).slice(-8), // Generate random password
         is_google_account: true,
       });
     }
