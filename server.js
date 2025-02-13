@@ -16,6 +16,7 @@ app.use(
       "https://vastra-cgrefthq2-rizkys-projects-2394185d.vercel.app",
       "http://localhost:5173"
     ],
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     exposedHeaders: ["Content-Type", "Authorization"],
@@ -28,6 +29,9 @@ app.use(express.json());
 
 // Middleware untuk melayani file statis (gambar, dll.)
 app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
+
+// Pastikan preflight request OPTIONS di-handle
+app.options("*", cors()); 
 
 // Rute utama aplikasi
 app.use(router);
